@@ -12,7 +12,7 @@ function App() {
             <hr></hr>
             <p><b>How to fix: </b> Fix the following:</p>
             <p> • Element has insufficient color contrast of 2.52 (forground color:, background color:, font size: 12.0pt (16px), font weight: normal).
-                  Expected contrast ratio of 4.5:1 Use forground color: <ColorDisplayBox />  to meet the expected contrast ratio.
+                  Expected contrast ratio of 4.5:1 Use forground color: <ColorDisplayBox color1={[255, 102, 0]} color2={[102, 102, 62]}/>  to meet the expected contrast ratio.
             </p>
             
         </div>
