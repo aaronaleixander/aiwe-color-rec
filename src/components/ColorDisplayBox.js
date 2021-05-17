@@ -3,7 +3,7 @@ import React from 'react'
 
 const ColorDisplayBox = (props) => {
 
-        // props will take in 2 color, color1 and color2
+    // props will take in 2 color, color1 and color2
 
     //identifies the lighter and darker color
 
@@ -61,7 +61,6 @@ const ColorDisplayBox = (props) => {
             <p>darkened: {darkened[0]}  {darkened[1]}  {darkened[2]} </p>
         </div>
     ) 
-
 }
 
 export default ColorDisplayBox

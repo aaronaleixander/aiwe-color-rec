@@ -10,6 +10,14 @@
   box-shadow: 5px 10px #888888;
 }
 
+.colors {
+  border: 1px solid black;
+  margin: 100px;
+  padding: 10px;
+  text-align: center;
+  box-shadow: 5px 10px #888888;
+}
+
 .box-color {
   height: 20px;
   width: 20px;
