@@ -1,16 +1,15 @@
 import React from 'react'
 import ColorDisplayBox from './components/ColorDisplayBox'
 import './App.css'
+import ColorPicker from './components/ColorPicker'
 
 function App() {
   return (
     <div className="App">
         <div className="colors">
            <h1>Select two colors to test contrast: </h1>
-           <label for="colorpicker">Color One:</label> 
-           <input type="color" id="color-picker-one" value=""></input>
-           <label for="colorpicker">Color Two:</label> 
-           <input type="color" id="color-picker-two" value=""></input>
+           <ColorPicker />
+           <ColorPicker />
         </div>
         <div className='example'>
             <p><b>Path: </b> li:nth child(1)> a[href='\#""]</p> 
