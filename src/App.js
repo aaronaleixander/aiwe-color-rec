@@ -6,11 +6,11 @@ function App() {
   return (
     <div className="App">
         <div className="colors">
-           <h1>Slect two colors too test contrast: </h1>
+           <h1>Select two colors to test contrast: </h1>
            <label for="colorpicker">Color One:</label> 
-           <input type="color" id="color-picker-one" value="#0000ff"></input>
+           <input type="color" id="color-picker-one" value=""></input>
            <label for="colorpicker">Color Two:</label> 
-           <input type="color" id="color-picker-two" value="#0000ff"></input>
+           <input type="color" id="color-picker-two" value=""></input>
         </div>
         <div className='example'>
             <p><b>Path: </b> li:nth child(1)> a[href='\#""]</p> 
