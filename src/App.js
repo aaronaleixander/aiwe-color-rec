@@ -1,23 +1,22 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react'
+import ColorDisplayBox from './components/ColorDisplayBox'
+import './App.css'
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+        <div className='example'>
+            <p><b>Path: </b> li:nth child(1)> a[href='\#""]</p> 
+            <hr></hr>
+            <p><b>Snippet: </b> a href="#" About /a </p>
+            <hr></hr>
+            <p><b>How to fix: </b> Fix the following:</p>
+            <p> • Element has insufficient color contrast of 2.52 (forground color:, background color:, font size: 12.0pt (16px), font weight: normal).
+                  Expected contrast ratio of 4.5:1 Use forground color: <ColorDisplayBox />  to meet the expected contrast ratio.
+            </p>
+            
+        </div>
+        
     </div>
   );
 }
