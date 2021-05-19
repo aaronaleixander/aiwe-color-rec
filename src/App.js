@@ -1,9 +1,12 @@
-import React from 'react'
+import React, {useState} from 'react'
 import ColorDisplayBox from './components/ColorDisplayBox'
 import './App.css'
 import ColorPicker from './components/ColorPicker'
 
 function App() {
+  const [pickColor1, setColor1] = useState("#000000");
+
+  const [pickColor2, setColor2] = useState("#000000");
   return (
     <div className="App">
         <div className="colors">
@@ -17,8 +20,10 @@ function App() {
             <p><b>Snippet: </b> a href="#" About /a </p>
             <hr></hr>
             <p><b>How to fix: </b> Fix the following:</p>
+            <input id="c1" type="color" value={pickColor1}  onChange={e => setColor1(e.target.value)}/>
+            <input id="c2" type="color" value={pickColor2}  onChange={e => setColor2(e.target.value)}/>
             <p> • Element has insufficient color contrast of 2.52 (forground color:, background color:, font size: 12.0pt (16px), font weight: normal).
-                  Expected contrast ratio of 4.5:1 Use forground color: <ColorDisplayBox color1={[255, 20, 12]} color2={[102, 102, 62]}/>  to meet the expected contrast ratio.
+                  Expected contrast ratio of 4.5:1 Use forground color: <ColorDisplayBox color1={pickColor1} color2={[pickColor2]}/>  to meet the expected contrast ratio.
             </p>
         </div>
     </div>
