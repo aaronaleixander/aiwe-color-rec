@@ -1,14 +1,21 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 
 const ColorDisplayBox = (props) => {
-    console.log("color1: " + props.color1);
-
-    console.log("color2: " + props.color2);
     const [lightPrint, setLightened] = useState(0);
     const [darkPrint, setDarkened] = useState(0);
-    console.log("LIGHTEN: " + lightPrint);
-    console.log("DARKENED: " + darkPrint); 
+
     //identifies the lighter and darker color
+    function rgbToHex(r,g,b) {
+        return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    } 
+
+    function hexToRGB(hex){
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? 
+            [parseInt(result[1], 16),
+            parseInt(result[2], 16),
+            parseInt(result[3], 16)] : null;
+    }
 
     //geets the luminence first
     function getLuminance(r, g, b){
@@ -18,13 +25,20 @@ const ColorDisplayBox = (props) => {
         });
         return a[0] * .2126 + a[1] * .7152 + a[2] * .0722;
     }
-
+    /**
+     * 
+     * @param {num} r red component
+     * @param {num} g green component
+     * @param {num} b blue component
+     * @param {boolean} shade true to lighten the color, false to darken the color
+     * @returns 
+     */
     function darkenLighten (r, g, b, shade){
         //shade = true lighten
         //shade = false darken
         let num = .8;
         if(shade){
-            num = 1.1;
+            num = 1.5;
         } 
         if(r * num <= 255 && r * num >= 0){
             r = Math.round(r*num);
@@ -37,105 +51,94 @@ const ColorDisplayBox = (props) => {
         }
         return [r,g,b];
     }
-    function rgbToHex(r,g,b) {
-        return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-    } 
-
-
-    function hexToRGB(hex){
-        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? 
-            [parseInt(result[1], 16),
-            parseInt(result[2], 16),
-            parseInt(result[3], 16)] : null;
-    }
-
+    
     function style (color){
         return {
-            background: color,
-            width: 10,
-            height: 10
+            background: color
         }
     }        
-
+    /**
+     * 
+     * @param {num} contrast The contrast number that will keep on changing/updating
+     * @param {rgb} toBeChanged The Color to be changed
+     * @param {num} originalPair the original color to be contrast the changing color with. given in luminence
+     * @param {boolean} toLightenDarken lighten if true, darken if false
+     */
+    function recommendAColor(contrast, toBeChanged, originalPair, toLightenDarken){
+        if(toLightenDarken){
+            while(contrast < 4.5){
+                const preContrast = contrast;
+                console.log("ContrastLight: " + contrast + "lighterColor: " + toBeChanged);
+                toBeChanged = darkenLighten(toBeChanged[0], toBeChanged[1], toBeChanged[2], toLightenDarken);
+                contrast = (getLuminance(toBeChanged[0], toBeChanged[1], toBeChanged[2]) + .05) / (originalPair + .05);
+                if(contrast === preContrast){
+                    break;
+                }
+            }
     
-    let lighter, darker, contrast, contrastDark, contrastLight;
-    //recommend([props.color1[0], props.color1[1], props.color1[2]], [props.color2[0], props.color2[1], props.color2[2]])
-    //let darkened = [props.color1[0], props.color1[1], props.color1[2]];
-    //let lightened = [props.color2[0], props.color2[1], props.color2[2]];
+            if(contrast < 4.5){
+                return [255,255,255];
+            }
+            return toBeChanged;
+        } else {
+            while(contrast < 4.5){
+                const preContrast = contrast;
+                console.log("ContrastDark: " + contrast + "DarkenedColor: " + toBeChanged);
+                toBeChanged = (darkenLighten(toBeChanged[0], toBeChanged[1], toBeChanged[2], toLightenDarken));
+                contrast = (originalPair + .05) / (getLuminance(toBeChanged[0], toBeChanged[1], toBeChanged[2]) + .05);
+                if(contrast === preContrast){
+                    break;
+                }
+            }
+            if(contrast < 4.5){
+                return [0,0,0];
+            }
+            return toBeChanged;
+        }
+    }
+    
+    
+
     function recommend(color1, color2){
+        let lighter, darker, contrast;
         //determine the luminance
-        console.log("icolor1: " + color1);
-        console.log("icolor2: " + color2);
         const lum1 = getLuminance(color1[0], color1[1], color1[2]);
         const lum2 = getLuminance(color2[0], color2[1], color2[2]);
-        
+        //set the luminance and get contrast
         lighter = Math.max(lum1, lum2);
         darker = lighter == lum1? lum2: lum1;
-
         contrast = (lighter + .05) / (darker + .05);
+        //set the corresponding color to the lighter or darker shade
         let lightened = color2;
         let darkened = color1;
-        //setLightened(color2);
-        //setDarkened(color1);
         if(lighter == lum1){
             lightened = color1;
             darkened = color2;
-            //setLightened(color1);
-            //setDarkened(color2);
+            console.log("lighter Color: " + color1 + " Darker Color: " + color2);
         }
-        contrastDark = contrast;
-        contrastLight = contrast;
-
+        
+        //recommending a color
+        lightened = recommendAColor(contrast, lightened, darker, true);
+        darkened = recommendAColor(contrast, darkened, lighter, false);
+        
+        //prints to check work
         console.log("Contrast: " + contrast);
         console.log("Color1: " + color1 + " Color2: " + color2)
-        console.log("ContrastLight: " + contrastLight + "lighterColor: " + lightened);
-        console.log("ContrastDark: " + contrastDark + "darkenColor: " + darkened);
-        console.log("!@#$%^&*");
-        //lightening the lighter color
-        while(contrastLight < 4.5){
-            const preContrast = contrastDark;
-            console.log("ContrastLight: " + contrastLight + "lighterColor: " + lightened);
-            //setLightened(darkenLighten(lightened[0], lightened[1], lightened[2], true));
-            lightened = darkenLighten(lightened[0], lightened[1], lightened[2], true);
-            contrastLight = (getLuminance(lightened[0], lightened[1], lightened[2]) + .05) / (darker + .05);
-            if(contrastLight === preContrast){
-                break;
-            }
+        if(lighter == lum1){
+            console.log("Lighter Color: " + color1 + " Recommended Darkened Color: " + darkened);
+            console.log("Darker Color:  " + color2 + " Recommended Lighter Color:  " + lightened);
+        } else {
+            console.log("Lighter Color: " + color2 + " Recommended Darkened Color: " + darkened);
+            console.log("Darker Color:  " + color1 + " Recommended Lighter Color:  " + lightened);
         }
+        console.log("lighterColor: " + lightened);
+        console.log("darkenColor: " + darkened );
 
-        while(contrastDark < 4.5){
-            const preContrast = contrastDark;
-            console.log("ContrastDark: " + contrastDark + "DarkenedColor: " + darkened);
-            //setDarkened(darkenLighten(darkened[0], darkened[1], darkened[2], false));
-            darkened = (darkenLighten(darkened[0], darkened[1], darkened[2], false));
-            contrastDark = (lighter + .05) / (getLuminance(darkened[0], darkened[1], darkened[2]) + .05);
-            if(contrastDark === preContrast){
-                break;
-            }
-        }
-        console.log("Contrast: " + contrast);
-        console.log("Color1: " + color1 + " Color2: " + color2)
-        console.log("ContrastLight: " + contrastLight + "lighterColor: " + lightened);
-        console.log("ContrastDark: " + contrastDark + "darkenColor: " + darkened);
+        //setting the color to be able to see it in the web
         setLightened(lightened);
         setDarkened(darkened);
     } 
-    /* 
-    <div>Contrast: {contrast}</div>
-            <p>lighter: {lighter}</p>
-            <p>darker: {darker}</p>
-
-            <p>contrastDark: {contrastDark} </p>
-            <p>contrastLight: {contrastLight}</p>
-
-            <span style = {style(rgbToHex(props.color1[0], props.color1[1], props.color1[2]))}>color1</span>
-            <span style = {style(rgbToHex(props.color2[0], props.color2[1], props.color2[2]))}>color2</span>
-            <br/>
-            <span style = {style(rgbToHex(lightened[0], lightened[1], lightened[2]))}>lightened:{lightened[0]} {lightened[1]} {lightened[2]} </span>
-            <span style = {style(rgbToHex(darkened[0], darkened[1], darkened[2]))}>darkened: {darkened[0]}  {darkened[1]}  {darkened[2]}</span> 
-            */
-
+    
     return (
         <div>
             <div>
