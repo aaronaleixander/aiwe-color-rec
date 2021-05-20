@@ -31,14 +31,14 @@ const ColorDisplayBox = (props) => {
      * @param {num} g green component
      * @param {num} b blue component
      * @param {boolean} shade true to lighten the color, false to darken the color
-     * @returns 
+     * @returns dakrened/lightened color by 20%/50%
      */
     function darkenLighten (r, g, b, shade){
         //shade = true lighten
         //shade = false darken
-        let num = .8;
+        let num = .9;
         if(shade){
-            num = 1.5;
+            num = 1.1;
         } 
         if(r * num <= 255 && r * num >= 0){
             r = Math.round(r*num);
@@ -65,39 +65,28 @@ const ColorDisplayBox = (props) => {
      * @param {boolean} toLightenDarken lighten if true, darken if false
      */
     function recommendAColor(contrast, toBeChanged, originalPair, toLightenDarken){
-        if(toLightenDarken){
-            while(contrast < 4.5){
-                const preContrast = contrast;
-                console.log("ContrastLight: " + contrast + "lighterColor: " + toBeChanged);
-                toBeChanged = darkenLighten(toBeChanged[0], toBeChanged[1], toBeChanged[2], toLightenDarken);
+        while(contrast < 4.5){
+            const preContrast = contrast;
+            console.log("Contrast: " + contrast + " ColorToBeChanged: " + toBeChanged);
+            toBeChanged = (darkenLighten(toBeChanged[0], toBeChanged[1], toBeChanged[2], toLightenDarken));
+            if(toLightenDarken){
                 contrast = (getLuminance(toBeChanged[0], toBeChanged[1], toBeChanged[2]) + .05) / (originalPair + .05);
-                if(contrast === preContrast){
-                    break;
-                }
-            }
-    
-            if(contrast < 4.5){
-                return [255,255,255];
-            }
-            return toBeChanged;
-        } else {
-            while(contrast < 4.5){
-                const preContrast = contrast;
-                console.log("ContrastDark: " + contrast + "DarkenedColor: " + toBeChanged);
-                toBeChanged = (darkenLighten(toBeChanged[0], toBeChanged[1], toBeChanged[2], toLightenDarken));
+            } else {
                 contrast = (originalPair + .05) / (getLuminance(toBeChanged[0], toBeChanged[1], toBeChanged[2]) + .05);
-                if(contrast === preContrast){
-                    break;
-                }
             }
-            if(contrast < 4.5){
+            if(contrast === preContrast){
+                break;
+            }
+        }
+        if(contrast < 4.5){
+            if(toLightenDarken){
+                return [255,255,255];
+            } else {
                 return [0,0,0];
             }
-            return toBeChanged;
         }
+        return toBeChanged;
     }
-    
-    
 
     function recommend(color1, color2){
         let lighter, darker, contrast;
@@ -106,25 +95,27 @@ const ColorDisplayBox = (props) => {
         const lum2 = getLuminance(color2[0], color2[1], color2[2]);
         //set the luminance and get contrast
         lighter = Math.max(lum1, lum2);
-        darker = lighter == lum1? lum2: lum1;
+        darker = lighter === lum1? lum2: lum1;
         contrast = (lighter + .05) / (darker + .05);
         //set the corresponding color to the lighter or darker shade
         let lightened = color2;
         let darkened = color1;
-        if(lighter == lum1){
+        if(lighter === lum1){
             lightened = color1;
             darkened = color2;
             console.log("lighter Color: " + color1 + " Darker Color: " + color2);
         }
         
         //recommending a color
+        console.log("LIGHTEN");
         lightened = recommendAColor(contrast, lightened, darker, true);
+        console.log("DARKEN");
         darkened = recommendAColor(contrast, darkened, lighter, false);
         
         //prints to check work
         console.log("Contrast: " + contrast);
         console.log("Color1: " + color1 + " Color2: " + color2)
-        if(lighter == lum1){
+        if(lighter === lum1){
             console.log("Lighter Color: " + color1 + " Recommended Darkened Color: " + darkened);
             console.log("Darker Color:  " + color2 + " Recommended Lighter Color:  " + lightened);
         } else {
