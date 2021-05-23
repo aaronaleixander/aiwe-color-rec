@@ -5,6 +5,9 @@ const ColorDisplayBox = (props) => {
     const [darkPrint, setDarkened] = useState(0);
     const [result, setResult] = useState("");
     const [originalContrast, setContrast] = useState("");
+    const [extra, setExtra] = useState("");
+    const MAXCOLORCOMPONENT = 255;
+    const MINCOLORCOMPONENT = 0;
 
     //converts rgb to hex
     function rgbToHex(r,g,b) {
@@ -28,6 +31,7 @@ const ColorDisplayBox = (props) => {
         });
         return a[0] * .2126 + a[1] * .7152 + a[2] * .0722;
     }
+
     /**
      * 
      * @param {num} r red component
@@ -36,23 +40,33 @@ const ColorDisplayBox = (props) => {
      * @param {boolean} shade true to lighten the color, false to darken the color
      * @returns dakrened/lightened color by 20%/50%
      */
-    function darkenLighten (r, g, b, shade){
+    function darkenLighten (color, shade){
+        
         //shade = true lighten
         //shade = false darken
         let num = .95;
         if(shade){
             num = 1.1;
+            if(color[0]===0 && color[1]===0 && color[2]===0){
+                console.log("INSIDE " + color);
+                color = [10,10,10];
+                console.log(color);
+            }
         } 
-        if(r * num <= 255 && r * num >= 0){
-            r = Math.round(r*num);
+        console.log(color + "Shade" + shade)
+        for(let i = 0; i < 3; i++){
+            let component = color[i];
+            console.log("Component" + component + "num " + num + "=" + component * num);
+            if(component * num <= MAXCOLORCOMPONENT && component * num >= MINCOLORCOMPONENT){
+                color[i] = Math.floor(component*num);
+            } else if(shade){
+                color[i] = MAXCOLORCOMPONENT;
+            } else {
+                color[i] = MINCOLORCOMPONENT;
+            }
         }
-        if(g * num <= 255 && g * num >= 0){
-            g = Math.round(g*num)
-        }
-        if(b * num <= 255 && b * num >= 0){
-            b = Math.round(b*num)
-        }
-        return [r,g,b];
+        console.log(color);
+        return color;
     }
     
     function style (bgcolor){
@@ -72,30 +86,20 @@ const ColorDisplayBox = (props) => {
         while(contrast < 4.5 && contrast !== preContrast){
             preContrast = contrast;
             //console.log("Contrast: " + contrast + " ColorToBeChanged: " + toBeChanged);
-            toBeChanged = (darkenLighten(toBeChanged[0], toBeChanged[1], toBeChanged[2], toLightenDarken));
+            toBeChanged = (darkenLighten(toBeChanged, toLightenDarken));
             if(toLightenDarken){
                 contrast = (getLuminance(toBeChanged) + .05) / (originalPair + .05);
             } else {
                 contrast = (originalPair + .05) / (getLuminance(toBeChanged) + .05);
             }
         }
-        if(contrast < 4.5){
-            /**
-             * FIXME: Edge cases 
-             * For some reason numbers arent able to go all the way up to 255/0
-             * in the darkenLighten function
-             * This is the fix for now.
-             */
-            if(toLightenDarken){
-                toBeChanged = [255,255,255];
-            } else {
-                toBeChanged = [0,0,0];
-            }
-        }
         return [toBeChanged, contrast];
     }
 
     function recommend(fore, back){
+        if(fore === [0,0,0] && back === [0,0,0]){
+            setResult(" Use white.");
+        }
         /**
          * TODO: look into font size to recommend the right colors
          * with the right ratios
@@ -115,11 +119,11 @@ const ColorDisplayBox = (props) => {
         if(lighter === lumFore){
             lightened = fore;
             darkened = back;
-            //console.log("lighter Color: " + fore + " Darker Color: " + back);
+            console.log("lighter Color: " + fore + " Darker Color: " + back);
         } else {
             lightened = back;
             darkened = fore;
-            //console.log("lighter Color: " + back + " Darker Color: " + fore);
+            console.log("lighter Color: " + back + " Darker Color: " + fore);
         }
         
         //recommending a color
@@ -135,21 +139,43 @@ const ColorDisplayBox = (props) => {
         //setting the color to be able to see it in the web
         setLightened(rgbToHex(lightened[0][0], lightened[0][1], lightened[0][2]));
         setDarkened(rgbToHex(darkened[0][0], darkened[0][1], darkened[0][2]));
+        
+        let sentence = "";
+        let extraSentence = "";
 
-        if(lighter === lumFore){
+         if(lighter === lumFore){
             //console.log("Lighter Color: " + fore + " Recommended Darkened Color: " + darkened);
             //console.log("Darker Color:  " + back + " Recommended Lighter Color:  " + lightened); 
-            setResult(" Use foreground color: " + lightPrint + "(with original background color ratio is: "+ lightened[1].toFixed(2) + 
-                ") or background color: " + darkPrint + "(with original foreground color ratio is: "+ darkened[1].toFixed(2) + ") to meet the expected contrast ratio.");
+            if(lightened[1] > 4.5){
+                sentence = " Use foreground color: " + lightPrint + " (with original background color ratio is: "+ lightened[1].toFixed(2) + ").";
+            } else {
+                extraSentence = " Use foreground color: " + lightPrint + " (with original background color ratio is: "+ lightened[1].toFixed(2) + ").";
+            }
+            if(darkened[1] > 4.5){
+                sentence = sentence + " Use background color: " + darkPrint + " (with original foreground color ratio is: "+ darkened[1].toFixed(2) + ") to meet the expected contrast ratio.";
+            } else {
+                extraSentence = extraSentence + " Use background color: " + darkPrint + " (with original foreground color ratio is: "+ darkened[1].toFixed(2) + ") to meet the expected contrast ratio.";
+            }
 
         } else {
             //console.log("Lighter Color: " + back + " Recommended Darkened Color: " + darkened);
             //console.log("Darker Color:  " + fore + " Recommended Lighter Color:  " + lightened);
-            setResult(" Use foreground color: " + darkPrint + "(with original background color ratio is: "+ darkened[1].toFixed(2) + ") or background color: " 
-                + lightPrint + "(with original foreground color ratio is: "+ lightened[1].toFixed(2) + ") to meet the expected contrast ratio.");
-        }
+            if(darkened[1] > 4.5){
+                sentence = " Use foreground color: " + darkPrint + " (with original background color ratio is: "+ darkened[1].toFixed(2) + ").";
+            } else {
+                extraSentence = " Use foreground color: " + darkPrint + " (with original background color ratio is: "+ darkened[1].toFixed(2) + ").";
+            }
+            if(lightened[1] > 4.5){
+                sentence = sentence + " Use background color: " + lightPrint + " (with original foreground color ratio is: "+ lightened[1].toFixed(2) + ") to meet the expected contrast ratio.";
+            } else {
+                extraSentence = extraSentence + " Use background color: " + lightPrint + " (with original foreground color ratio is: "+ lightened[1].toFixed(2) + ") to meet the expected contrast ratio.";
+            }
+        } 
+        setResult(sentence);
+        setExtra(extraSentence);
         //console.log("lighterColor: " + lightened);
         //console.log("darkenColor: " + darkened );
+        //return setResult
     } 
     
     return (
@@ -163,7 +189,16 @@ const ColorDisplayBox = (props) => {
                 <br/>
                 • Element has insufficient color contrast of {originalContrast} 
                 (forground color: {props.color1}, background color: {props.color2}, 
-                font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1 or greater.{result}</div>
+                font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1 or greater.
+                <br/>
+                {result}</div>
+                <br/>
+                <br/>
+
+                <div>
+                    For debugging purposes:
+                    {extra}
+                </div>
         </div>
     ) 
 }
