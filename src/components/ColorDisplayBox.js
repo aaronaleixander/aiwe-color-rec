@@ -49,9 +49,8 @@ const ColorDisplayBox = (props) => {
             num = 1.1;
             if(color[0]===0 && color[1]===0 && color[2]===0){
                 console.log("INSIDE " + color);
-                color = [5,5,5];
+                color = [10,10,10];
                 console.log(color);
-
             }
         } 
         console.log(color + "Shade" + shade)
@@ -59,7 +58,7 @@ const ColorDisplayBox = (props) => {
             let component = color[i];
             console.log("Component" + component + "num " + num + "=" + component * num);
             if(component * num <= MAXCOLORCOMPONENT && component * num >= MINCOLORCOMPONENT){
-                color[i] = Math.round(component*num);
+                color[i] = Math.floor(component*num);
             } else if(shade){
                 color[i] = MAXCOLORCOMPONENT;
             } else {
@@ -140,48 +139,43 @@ const ColorDisplayBox = (props) => {
         //setting the color to be able to see it in the web
         setLightened(rgbToHex(lightened[0][0], lightened[0][1], lightened[0][2]));
         setDarkened(rgbToHex(darkened[0][0], darkened[0][1], darkened[0][2]));
-        setResult("");
-        setExtra("");
-        if(lighter === lumFore){
-            setResult(" Use foreground color: " + lightPrint + "(with original background color ratio is: "+ lightened[1].toFixed(2) + ")."
-                 + " Use background color: " + darkPrint + "(with original foreground color ratio is: "+ darkened[1].toFixed(2) + ") to meet the expected contrast ratio.");
+        
+        let sentence = "";
+        let extraSentence = "";
 
-        } else {
-            setResult(" Use foreground color: " + darkPrint + "(with original background color ratio is: "+ darkened[1].toFixed(2) + ")."
-                 + " Use background color: " + lightPrint + "(with original foreground color ratio is: "+ lightened[1].toFixed(2) + ") to meet the expected contrast ratio.");
-
-        }
-    
-        /* if(lighter === lumFore){
-            console.log("Lighter Color: " + fore + " Recommended Darkened Color: " + darkened);
-            console.log("Darker Color:  " + back + " Recommended Lighter Color:  " + lightened); 
+         if(lighter === lumFore){
+            //console.log("Lighter Color: " + fore + " Recommended Darkened Color: " + darkened);
+            //console.log("Darker Color:  " + back + " Recommended Lighter Color:  " + lightened); 
             if(lightened[1] > 4.5){
-                setResult(" Use foreground color: " + lightPrint + "(with original background color ratio is: "+ lightened[1].toFixed(2) + ").");
+                sentence = " Use foreground color: " + lightPrint + " (with original background color ratio is: "+ lightened[1].toFixed(2) + ").";
             } else {
-                setExtra(" Use foreground color: " + lightPrint + "(with original background color ratio is: "+ lightened[1].toFixed(2) + ").");
+                extraSentence = " Use foreground color: " + lightPrint + " (with original background color ratio is: "+ lightened[1].toFixed(2) + ").";
             }
             if(darkened[1] > 4.5){
-                setResult(result + " Use background color: " + darkPrint + "(with original foreground color ratio is: "+ darkened[1].toFixed(2) + ") to meet the expected contrast ratio.");
+                sentence = sentence + " Use background color: " + darkPrint + " (with original foreground color ratio is: "+ darkened[1].toFixed(2) + ") to meet the expected contrast ratio.";
             } else {
-                setExtra(extra + " Use background color: " + darkPrint + "(with original foreground color ratio is: "+ darkened[1].toFixed(2) + ") to meet the expected contrast ratio.");
+                extraSentence = extraSentence + " Use background color: " + darkPrint + " (with original foreground color ratio is: "+ darkened[1].toFixed(2) + ") to meet the expected contrast ratio.";
             }
 
         } else {
             //console.log("Lighter Color: " + back + " Recommended Darkened Color: " + darkened);
             //console.log("Darker Color:  " + fore + " Recommended Lighter Color:  " + lightened);
-            if(lightened[1] > 4.5){
-                setResult(" Use foreground color: " + darkPrint + "(with original background color ratio is: "+ darkened[1].toFixed(2) + ").");
-            } else {
-                setExtra(" Use foreground color: " + darkPrint + "(with original background color ratio is: "+ darkened[1].toFixed(2) + ").");
-            }
             if(darkened[1] > 4.5){
-                setResult(result +" Use background color: " + lightPrint + "(with original foreground color ratio is: "+ lightened[1].toFixed(2) + ") to meet the expected contrast ratio.");
+                sentence = " Use foreground color: " + darkPrint + " (with original background color ratio is: "+ darkened[1].toFixed(2) + ").";
             } else {
-                setExtra(extra +" Use background color: " + lightPrint + "(with original foreground color ratio is: "+ lightened[1].toFixed(2) + ") to meet the expected contrast ratio.");
+                extraSentence = " Use foreground color: " + darkPrint + " (with original background color ratio is: "+ darkened[1].toFixed(2) + ").";
             }
-        } */
+            if(lightened[1] > 4.5){
+                sentence = sentence + " Use background color: " + lightPrint + " (with original foreground color ratio is: "+ lightened[1].toFixed(2) + ") to meet the expected contrast ratio.";
+            } else {
+                extraSentence = extraSentence + " Use background color: " + lightPrint + " (with original foreground color ratio is: "+ lightened[1].toFixed(2) + ") to meet the expected contrast ratio.";
+            }
+        } 
+        setResult(sentence);
+        setExtra(extraSentence);
         //console.log("lighterColor: " + lightened);
         //console.log("darkenColor: " + darkened );
+        //return setResult
     } 
     
     return (
@@ -202,6 +196,7 @@ const ColorDisplayBox = (props) => {
                 <br/>
 
                 <div>
+                    For debugging purposes:
                     {extra}
                 </div>
         </div>
