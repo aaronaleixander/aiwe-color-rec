@@ -1,8 +1,8 @@
-import React, {useState} from 'react';
+import React, {SetStateAction, useState} from 'react';
 
-const ColorDisplayBox = (props) => {
-    const [lightPrint, setLightened]  = useState(0);
-    const [darkPrint, setDarkened]  = useState(0);
+const ColorDisplayBox = (props: { color1: any; color2: string; }) => {
+    const [lightPrint, setLightened] : any  = useState(0);
+    const [darkPrint, setDarkened] : any = useState(0);
     const [result, setResult]  = useState("");
     const [originalContrast, setContrast]  = useState("");
     const [extra, setExtra]  = useState("");
@@ -10,21 +10,22 @@ const ColorDisplayBox = (props) => {
     const MINCOLORCOMPONENT : number = 0;
 
     //converts rgb to hex
-    function rgbToHex(r,g,b) : string {
+    function rgbToHex(r : number,g : number,b : number) : SetStateAction<string> {
         return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     } 
 
     //converts hex to rgb
-    function hexToRGB(hex) : object {
-        var result : object = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? 
+    function hexToRGB(hex : string) : number[]  {
+        var result : any  = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return  (
             [parseInt(result[1], 16),
             parseInt(result[2], 16),
-            parseInt(result[3], 16)] : null;
+            parseInt(result[3], 16)]
+            )
     }
 
     //gets the luminence first
-    function getLuminance(color) : number {
+    function getLuminance(color : number[] ) : number {
         const a = [color[0], color[1], color[2]].map(function (v){
             v /= 255;
             return v <= 0.03928 ? v / 12.92 : Math.pow( (v + 0.055 ) / 1.055, 2.4);
@@ -40,7 +41,7 @@ const ColorDisplayBox = (props) => {
      * @param {boolean} shade true to lighten the color, false to darken the color
      * @returns dakrened/lightened color by 20%/50%
      */
-    function darkenLighten (color : object, shade : boolean) : object {
+    function darkenLighten (color : number[], shade : boolean) : object {
         
         //shade = true lighten
         //shade = false darken
@@ -69,7 +70,7 @@ const ColorDisplayBox = (props) => {
         return color;
     }
     
-    function style (bgcolor) : object{
+    function style (bgcolor : object) : object{
         return {
             background: bgcolor, 
         }
@@ -81,12 +82,12 @@ const ColorDisplayBox = (props) => {
      * @param {num} originalPair the original color to be contrast the changing color with. given in luminence
      * @param {boolean} toLightenDarken lighten if true, darken if false
      */
-    function recommendAColor(contrast : number, toBeChanged : object, originalPair : number, toLightenDarken : boolean) : object{
+    function recommendAColor(contrast : number, toBeChanged : any , originalPair : number, toLightenDarken : boolean) : object{
         let preContrast : number = -1;
         while(contrast < 4.5 && contrast !== preContrast){
             preContrast = contrast;
             //console.log("Contrast: " + contrast + " ColorToBeChanged: " + toBeChanged);
-            toBeChanged = (darkenLighten(toBeChanged, toLightenDarken));
+            toBeChanged = darkenLighten(toBeChanged, toLightenDarken);
             if(toLightenDarken){
                 contrast = (getLuminance(toBeChanged) + .05) / (originalPair + .05);
             } else {
@@ -96,7 +97,7 @@ const ColorDisplayBox = (props) => {
         return [toBeChanged, contrast];
     }
 
-    function recommend(fore : object, back : object){
+    function recommend(fore : number[], back : number[]){
         if(fore === [0,0,0] && back === [0,0,0]){
             setResult(" Use white.");
         }
@@ -115,7 +116,7 @@ const ColorDisplayBox = (props) => {
         setContrast(contrast.toFixed(2));
 
         //set the corresponding color to be lighter or darker shade
-        let lightened : object, darkened : object;
+        let lightened : any, darkened : any;
         if(lighter === lumFore){
             lightened = fore;
             darkened = back;

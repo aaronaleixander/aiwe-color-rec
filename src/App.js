@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import ColorDisplayBox from './components/ColorDisplayBox'
+import ColorDisplayBox from './components/ColorDisplayBox.tsx'
 import './App.css'
 import ColorPicker from './components/ColorPicker'
 
